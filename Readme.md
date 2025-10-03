@@ -12,7 +12,7 @@ This is the **final 10-day basic shell scripting plan** to follow from scratch. 
 * [ ] Learn about shebang (`#!/bin/bash`) and script execution
 * [ ] Set script permissions using `chmod +x`
 * [ ] Run a shell script from the terminal
-* [ ] Use `echo` to print messages
+* [ ] Use `echo` and `printf` to print messages
 * [ ] Use comments (`#`) effectively in scripts
 
 ---

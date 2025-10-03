@@ -406,6 +406,150 @@ Task completed!
 
 ---
 
+# Shell Scripting: printf Command
+
+## Concept / What
+
+`printf` is a built-in command in shell scripting used to print formatted output. Unlike `echo`, it does not automatically add a newline and allows precise formatting using format specifiers.
+
+## Why / Purpose / Use Case
+
+* Print text with custom formatting.
+* Align columns, pad spaces, display decimal places.
+* Print multiple values in a single statement.
+* Useful in automation scripts, reports, and logs.
+
+**Example use cases:**
+
+* Display a table of usernames and IDs.
+* Print floating-point numbers with a fixed number of decimals.
+* Avoid automatic newlines in loops or repeated outputs.
+
+## How it Works / Steps / Syntax
+
+**Syntax:**
+
+```bash
+printf FORMAT [ARGUMENTS...]
+```
+
+**Format Specifiers:**
+
+| Specifier | Meaning               |
+| --------- | --------------------- |
+| `%s`      | String                |
+| `%d`      | Integer (decimal)     |
+| `%f`      | Floating-point number |
+| `%x`      | Hexadecimal           |
+| `%o`      | Octal                 |
+
+**Examples:**
+
+1. **Simple string output**
+
+```bash
+printf "Hello, %s!\n" "Alice"
+# Output: Hello, Alice!
+```
+
+2. **Integer output**
+
+```bash
+age=25
+printf "Your age is %d\n" "$age"
+# Output: Your age is 25
+```
+
+3. **Floating-point with precision**
+
+```bash
+pi=3.14159
+printf "Pi: %.2f\n" "$pi"
+# Output: Pi: 3.14
+```
+
+4. **Multiple values**
+
+```bash
+name="Bob"
+age=30
+printf "Name: %s, Age: %d\n" "$name" "$age"
+# Output: Name: Bob, Age: 30
+```
+
+5. **No newline (same line printing)**
+
+```bash
+printf "Loading... "
+printf "Done!\n"
+# Output: Loading... Done!
+```
+
+## Common Issues / Errors
+
+* Forgetting `\n` → output stays on the same line.
+* Mismatched format specifiers and arguments → prints garbage or errors.
+* Not quoting variables → word splitting or unexpected behavior with spaces.
+
+## Troubleshooting / Fixes
+
+* Always quote variables: `printf "%s" "$var"`
+* Match the number of arguments with the number of specifiers.
+* Include `\n` at the end if you want a newline.
+* Use correct type for `%d`, `%f`, `%s`.
+
+## Best Practices / Tips
+
+* Prefer `printf` over `echo` for precise output formatting.
+* Use `%s` for strings, `%d` for integers, `%f` for floating numbers.
+* For loops or repeated outputs, `printf` avoids multiple newlines.
+* Combine multiple specifiers in one statement for clean, readable output.
+
+## Example Scripts
+
+**Script 13: Simple String Output → `13_printf_string.sh`**
+
+```bash
+#!/bin/bash
+name="Alice"
+printf "Hello, %s!\n" "$name"
+```
+
+**Script 14: Integer Output → `14_printf_integer.sh`**
+
+```bash
+#!/bin/bash
+age=25
+printf "Your age is %d\n" "$age"
+```
+
+**Script 15: Floating-point Output → `15_printf_float.sh`**
+
+```bash
+#!/bin/bash
+pi=3.14159
+printf "Pi: %.2f\n" "$pi"
+```
+
+**Script 16: Multiple Values → `16_printf_multiple.sh`**
+
+```bash
+#!/bin/bash
+name="Bob"
+age=30
+printf "Name: %s, Age: %d\n" "$name" "$age"
+```
+
+**Script 17: Same-line Output → `17_printf_same_line.sh`**
+
+```bash
+#!/bin/bash
+printf "Loading... "
+printf "Done!\n"
+```
+---
+
+
 ## Concept 6: Using Comments (`#`) Effectively in Scripts
 
 ### Concept / What
