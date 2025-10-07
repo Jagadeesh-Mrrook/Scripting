@@ -632,4 +632,466 @@ for additional messages or logging
 3. Run it: `./comments_demo.sh`
 
 ---
+---
+
+# Check Exit Status of Commands Using `$?`
+
+## Concept / What
+
+Every command executed in Linux returns an **exit status** (integer) indicating success or failure.
+
+* `0` → Success
+* Non-zero → Failure
+  The special variable `$?` stores the exit status of the **last executed command**.
+
+## Why / Purpose / Use Case
+
+* Determine if a command succeeded before taking further action.
+* Essential for **error handling** in scripts.
+* Useful in **automation, CI/CD pipelines, and system administration**.
+* Practical Scenarios:
+
+  * Verify backup completion before deleting old files.
+  * Check if a service started successfully before running dependent tasks.
+  * Ensure a file exists before copying/moving it.
+
+## How it Works / Steps / Syntax
+
+1. Run a command.
+2. Immediately after, check `$?`:
+
+```bash
+ls /home
+echo $?    # 0 if success
+```
+
+```bash
+ls /nonexistent/path
+echo $?    # Non-zero if failure
+```
+
+**In scripts (simple example):**
+
+```bash
+#!/bin/bash
+ls /etc/passwd
+if [ $? -eq 0 ]; then
+  echo "File exists."
+else
+  echo "File does not exist."
+fi
+```
+
+## Common Issues / Errors
+
+* `$?` always returns 0 → another command ran before checking `$?`.
+* Misinterpreting non-zero exit codes → just need to check success/failure, not exact number.
+* Pipelines only capture the last command’s exit code → use `set -o pipefail` for full check.
+
+## Troubleshooting / Fixes
+
+* Check `$?` **immediately** after the command.
+* Use `set -o pipefail` for pipelines to detect any command failure.
+* Use `echo $?` for debugging exit status.
+
+## Best Practices / Tips
+
+* Handle exit codes for critical commands (backups, deployments, etc.).
+* Combine with `&&` or `||` for simpler control flow.
+* Avoid ignoring non-zero codes in production scripts — log or exit.
+* Use `set -e` to automatically exit on non-zero status if appropriate.
+
+## Example Script
+
+```bash
+#!/bin/bash
+# Purpose: Demonstrate use of $? to check exit status
+
+ls /etc/passwd
+if [ $? -eq 0 ]; then
+  echo "File found!"
+else
+  echo "File not found!"
+fi
+
+ls /notfound
+if [ $? -ne 0 ]; then
+  echo "Error occurred."
+fi
+```
+
+### How to Run
+
+1. Save as `exit_status_demo.sh`
+2. Add execute permission:
+
+```bash
+chmod +x exit_status_demo.sh
+```
+
+3. Run:
+
+```bash
+./exit_status_demo.sh
+```
+
+---
+---
+
+# Use `exit` to Terminate Scripts
+
+## Concept / What
+
+The `exit` command is used to **terminate a shell script immediately** and optionally return a status code to the calling environment.
+
+* `exit 0` → Success
+* `exit 1` (or any non-zero) → Failure or error
+
+## Why / Purpose / Use Case
+
+* Stop script execution when a critical error occurs.
+* Communicate success or failure to other scripts or automation pipelines.
+* Useful for **error handling** and **conditional exits**.
+
+**Practical Scenarios:**
+
+* Stop a script if a required file is missing.
+* Exit a deployment script if a service fails to start.
+* Signal a failure in a CI/CD pipeline by returning a non-zero code.
+
+## How it Works / Steps / Syntax
+
+1. Use `exit` at the point you want to terminate the script.
+2. Optionally provide a numeric exit code:
+
+   ```bash
+   exit 0   # success
+   exit 1   # failure
+   ```
+3. Once `exit` is executed, no further commands in the script run.
+
+**Simple Example:**
+
+```bash
+#!/bin/bash
+# Check if a file exists, exit if not
+
+FILE=/tmp/demo.txt
+if [ ! -f "$FILE" ]; then
+  echo "File not found. Exiting script."
+  exit 1
+fi
+
+echo "File exists. Continuing script..."
+```
+
+## Common Issues / Errors
+
+* Forgetting `exit` in error conditions → script continues unexpectedly.
+* Using `exit` without understanding impact → stops entire script immediately.
+* Confusing shell exit codes with command exit codes.
+
+## Troubleshooting / Fixes
+
+* Use `echo` before `exit` to log messages.
+* Test scripts with and without error conditions.
+* Combine with `$?` to exit based on previous command status.
+
+**Example with `$?`:**
+
+```bash
+#!/bin/bash
+cp /tmp/file1 /backup/
+if [ $? -ne 0 ]; then
+  echo "Copy failed. Exiting."
+  exit 1
+fi
+
+echo "Copy successful."
+```
+
+## Best Practices / Tips
+
+* Use meaningful exit codes (`0` for success, `1` for general error, other numbers for specific cases if needed).
+* Keep scripts readable; don’t overuse `exit` in non-critical places.
+* Combine with `$?` for robust error handling.
+* Use logging or messages before `exit` for clarity.
+
+## Example Script
+
+```bash
+#!/bin/bash
+# Purpose: Demonstrate use of exit command
+
+echo "Starting script..."
+
+ls /notfound
+if [ $? -ne 0 ]; then
+  echo "Critical file missing. Exiting script."
+  exit 1
+fi
+
+echo "This will not be printed if exit occurs above."
+```
+
+### How to Run
+
+1. Save as `exit_demo.sh`
+2. Add execute permission:
+
+```bash
+chmod +x exit_demo.sh
+```
+
+3. Run:
+
+```bash
+./exit_demo.sh
+```
+
+---
+---
+
+# Quoting & Escaping in Shell Scripts
+
+## Concept / What
+
+Quoting and escaping are ways to control how the shell interprets **special characters** and **spaces** in strings or commands:
+
+* **Single quotes `'...'`**: Preserve literal value of all characters inside.
+* **Double quotes `"..."`**: Preserve most characters, but allow **variable and command substitution**.
+* **Backslash `\`**: Escape a single character to prevent special interpretation.
+
+## Why / Purpose / Use Case
+
+* Prevent word splitting or globbing when dealing with filenames or strings.
+* Safely use variables containing spaces or special characters.
+* Avoid syntax errors caused by special shell characters.
+
+**Practical Scenarios:**
+
+* File paths with spaces: `/home/user/My Files/file.txt`
+* Printing variables containing `$` or `*`
+* Passing arguments to commands safely
+
+## How it Works / Steps / Syntax
+
+**Single quotes:**
+
+```bash
+echo 'Hello $USER *'
+# Output: Hello $USER *
+```
+
+* Everything inside single quotes is literal.
+
+**Double quotes:**
+
+```bash
+NAME="Alice"
+echo "Hello $NAME"
+# Output: Hello Alice
+```
+
+* Variables (`$NAME`) and command substitution (`$(...)`) are expanded.
+
+**Backslash escaping:**
+
+```bash
+echo Hello\ World
+# Output: Hello World
+
+echo "\$100"
+# Output: $100
+```
+
+* Use `\` before a special character to treat it literally.
+
+## Common Issues / Errors
+
+* Forgetting quotes around filenames with spaces → command fails.
+* Using single quotes when variable expansion is needed → variable not expanded.
+* Misplacing backslashes → syntax errors or unexpected output.
+
+## Troubleshooting / Fixes
+
+* Always quote variables with spaces: `"$VAR"`
+* Use single quotes when you want literal text.
+* Use backslash to escape special characters like `$`, `*`, `?`, `"`, `'`, or `\`.
+
+## Best Practices / Tips
+
+* Prefer double quotes for variables: `echo "$VAR"`
+* Use single quotes for fixed strings that should not change.
+* Escape only the necessary character, not the whole string.
+* Consistently quote variables to avoid surprises in scripts.
+
+## Example Script
+
+```bash
+#!/bin/bash
+# Purpose: Demonstrate quoting and escaping
+
+NAME="Alice Bob"
+FILE="My File.txt"
+
+# Single quotes (literal)
+echo 'Hello $NAME *'
+
+# Double quotes (expand variable)
+echo "Hello $NAME"
+
+# Backslash escaping
+echo Hello\ World
+echo "\$100"
+```
+
+### How to Run
+
+1. Save as `quoting_demo.sh`
+2. Add execute permission:
+
+```bash
+chmod +x quoting_demo.sh
+```
+
+3. Run:
+
+```bash
+./quoting_demo.sh
+```
+
+---
+---
+
+# Command Chaining Basics: &&, ||, ;, &
+
+## Concept / What
+
+Command chaining allows you to **run multiple commands in a sequence** based on the **success, failure, or unconditionally** of previous commands:
+
+* **`&&`** → run the next command **only if the previous command succeeds** (exit code 0)
+* **`||`** → run the next command **only if the previous command fails** (non-zero exit code)
+* **`;`** → run the next command **regardless of success or failure**
+* **`&`** → run the command **in the background**, immediately returning control to the shell
+
+## Why / Purpose / Use Case
+
+* Combine commands efficiently without writing multiple `if` statements.
+* Perform conditional execution based on success or failure.
+* Execute commands sequentially or in the background as needed.
+* Useful in automation, installation scripts, or deployment pipelines.
+
+**Practical Scenarios:**
+
+* Run a command only if a file exists.
+* Execute a backup only if the previous step succeeded.
+* Print an error message if a command fails.
+* Run independent commands sequentially or in background.
+
+## How it Works / Steps / Syntax
+
+**Using `&&` (AND operator):**
+
+```bash
+mkdir /tmp/demo && echo "Directory created successfully"
+```
+
+* `echo` runs **only if** `mkdir` succeeds.
+
+**Using `||` (OR operator):**
+
+```bash
+mkdir /tmp/demo || echo "Failed to create directory"
+```
+
+* `echo` runs **only if** `mkdir` fails.
+
+**Using `;` (semicolon):**
+
+```bash
+mkdir /tmp/demo; echo "This runs no matter what"
+```
+
+* `echo` runs **regardless** of whether `mkdir` succeeds or fails.
+
+**Using `&` (background execution):**
+
+```bash
+sleep 5 &
+echo "This prints immediately, while sleep runs in background"
+```
+
+* `sleep` runs in the background; the next command executes immediately.
+
+**Combining `&&` and `||`:**
+
+```bash
+mkdir /tmp/demo2 && echo "Success" || echo "Failure"
+```
+
+* Prints `Success` if `mkdir` works, else prints `Failure`.
+
+## Common Issues / Errors
+
+* Misunderstanding operator precedence → unexpected results.
+* Running commands that always succeed/fail → chaining behaves differently.
+* Forgetting spaces around operators → syntax error.
+
+## Troubleshooting / Fixes
+
+* Ensure spaces before and after `&&`, `||`, `;`, and `&`.
+* Test commands individually before chaining.
+* Use parentheses for complex chains to control order.
+
+## Best Practices / Tips
+
+* Use `&&` for dependent commands that must succeed.
+* Use `||` for error handling or fallback commands.
+* Use `;` for unconditional sequencing.
+* Use `&` for background execution of independent commands.
+* For readability, break complex chains into multiple lines.
+* Combine with `exit` to terminate scripts on failure if needed.
+
+## Example Script
+
+```bash
+#!/bin/bash
+# Purpose: Demonstrate command chaining with &&, ||, ;, &
+
+# Example with &&
+echo "Creating directory..." && mkdir /tmp/demo && echo "Directory created successfully"
+
+# Example with ||
+echo "Creating directory again..." || echo "Failed to create directory"
+
+# Example with ;
+echo "Running command unconditionally"; mkdir /tmp/demo3; echo "This runs regardless"
+
+# Example with &
+sleep 5 &
+echo "This prints immediately, while sleep runs in background"
+
+# Combined example
+mkdir /tmp/demo4 && echo "Success" || echo "Failure"
+```
+
+### How to Run
+
+1. Save as `command_chaining_demo.sh`
+2. Add execute permission:
+
+```bash
+chmod +x command_chaining_demo.sh
+```
+
+3. Run:
+
+```bash
+./command_chaining_demo.sh
+```
+
+---
+---
+
 
