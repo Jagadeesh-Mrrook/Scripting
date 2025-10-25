@@ -285,6 +285,24 @@ There are 4 common ways to run a shell script:
 * Left-hand `PATH=` is the new variable we are creating.
 * After exporting, the shell searches your folder first, then the old directories.
 
+### Bash Script Execute Permission Notes
+
+* **Execute permission (`x`)** on a script allows the file to be run directly using `./script.sh`.
+* If a script has **read (`r`) permission**, it can still be executed by explicitly running `bash script.sh` or `sh script.sh`, even without `x` permission.
+* Therefore, the **execute bit is primarily for convenience and direct execution**, not for full security.
+* **Security of a script depends on read/write permissions**: if unauthorized users cannot read the script, they cannot execute it, even with `bash script.sh`.
+* **Best practice for secure scripts**: use `chmod 700 script.sh` to restrict read, write, and execute to the owner only.
+* Summary Table:
+
+| Permission | What it controls                                                        |
+| ---------- | ----------------------------------------------------------------------- |
+| `r`        | Ability to read the file and execute via interpreter (`bash script.sh`) |
+| `x`        | Ability to execute directly (`./script.sh`)                             |
+| Security   | Restrict read/write to prevent unauthorized execution                   |
+
+**Key takeaway:** `x` is convenience, real security comes from controlling read access.
+
+
 ### Common Issues / Errors
 
 * **Error:** `Permission denied` → script doesn’t have execute permission.
@@ -351,7 +369,7 @@ The `echo` command in shell scripting is used to **display text or variables** t
 2. Common options:
 
    * `-n` → Do not append a newline at the end.
-   * `-e` → Enable interpretation of backslash escapes (`\n`, `\t`, etc.).
+   * `-e` → Enable interpretation of backslash escapes (`\n--Next line`, `\t--tab`, `\\--backslash` etc.).
 3. Examples:
 
    ```bash
@@ -484,6 +502,94 @@ printf "Loading... "
 printf "Done!\n"
 # Output: Loading... Done!
 ```
+
+### Shell Scripting: printf Notes
+
+`printf` is used for **precise output formatting** in Bash, unlike `echo` which is more basic.
+
+---
+
+## 1️⃣ Basics
+
+Syntax:
+
+```bash
+printf "format string" values...
+```
+
+* **Format string** contains conversion specifiers like `%s`, `%d`, `%f`.
+* Each value replaces a corresponding specifier.
+* Does **not automatically add a newline** unless `\n` is used.
+
+---
+
+## 2️⃣ Align Columns
+
+```bash
+printf "%-10s %-10s %-10s\n" Name Age City
+printf "%-10s %-10d %-10s\n" Jagga 25 Delhi
+printf "%-10s %-10d %-10s\n" Alice 30 Mumbai
+```
+
+Output:
+
+```
+Name       Age        City
+Jagga      25         Delhi
+Alice      30         Mumbai
+```
+
+* `%-10s` → left-align string in 10-character wide column
+* `%-10d` → left-align integer in 10-character wide column
+* `\n` → newline
+
+---
+
+## 3️⃣ Pad Spaces
+
+```bash
+printf "%5d\n" 7
+printf "%5d\n" 123
+```
+
+Output:
+
+```
+    7
+  123
+```
+
+* `%5d` → pad integer with spaces to make width 5, right-aligned by default.
+
+---
+
+## 4️⃣ Decimal Places
+
+```bash
+printf "%.2f\n" 3.14159
+printf "%.4f\n" 2.71828
+```
+
+Output:
+
+```
+3.14
+2.7183
+```
+
+* `%.2f` → floating number with 2 decimal places
+* `%.4f` → floating number with 4 decimal places
+
+---
+
+### ✅ Key Points
+
+* `printf` gives **fine-grained control** over output.
+* Allows **aligned columns, padded spaces, and controlled decimals**.
+* Use `\n` for newlines.
+* More powerful than `echo` for production or formatted
+
+
 
 ## Common Issues / Errors
 
