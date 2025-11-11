@@ -759,7 +759,6 @@ Common file test operators:
 | `-c`     | True if file is a character device        |
 | `-nt`    | True if file1 is newer than file2         |
 | `-ot`    | True if file1 is older than file2         |
-| `-o`     | True if file exists (similar to `-e`)     |
 
 **Example:**
 

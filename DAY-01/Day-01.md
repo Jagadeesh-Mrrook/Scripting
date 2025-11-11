@@ -1196,7 +1196,47 @@ chmod +x command_chaining_demo.sh
 ```bash
 ./command_chaining_demo.sh
 ```
+---
+---
 
+# Command Grouping (Subtopic Notes)
+
+## Purpose
+
+Command grouping (`{ ... }`) lets you combine **multiple commands into one unit** so they work correctly with `&&` and `||`.
+
+## Syntax
+
+```
+{ command1; command2; }
+```
+
+* Commands inside must end with `;`
+* Acts as a **single command** in chaining
+
+## Why We Use It
+
+Chaining normally handles only one command:
+
+```
+mkdir backup && echo "OK" || echo "FAIL"
+```
+
+But when failure needs **multiple actions** (e.g., message + exit), grouping is required.
+
+## Example
+
+```
+mkdir backup && echo "Backup directory created" || {
+    echo "Backup directory creation failed";
+    exit 5;
+}
+```
+
+* Success → only success message runs
+* Failure → entire group runs (message + exit)
+
+---
 ---
 ---
 

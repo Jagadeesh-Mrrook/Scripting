@@ -519,6 +519,7 @@ Command-line arguments allow a script to accept **input values at runtime**, mak
 2. `$@` → All arguments as **separate words**.
 3. `$*` → All arguments as **a single string**.
 4. `$#` → Total number of arguments passed.
+5. `$0` → Name of the script or Path used to run the script.
 
 **Accessing Arguments Example:**
 
@@ -1255,6 +1256,149 @@ echo "Updated PATH: $PATH"
 1. Save as `18_env_vars.sh`
 2. Make executable: `chmod +x 18_env_vars.sh`
 3. Exec
+---
+---
+
+# Command Grouping (Subtopic Notes)
+
+## Purpose
+
+Command grouping (`{ ... }`) lets you combine **multiple commands into one unit** so they work correctly with `&&` and `||`.
+
+## Syntax
+
+```
+{ command1; command2; }
+```
+
+* Commands inside must end with `;`
+* Acts as a **single command** in chaining
+
+## Why We Use It
+
+Chaining normally handles only one command:
+
+```
+mkdir backup && echo "OK" || echo "FAIL"
+```
+
+But when failure needs **multiple actions** (e.g., message + exit), grouping is required.
+
+## Example
+
+```
+mkdir backup && echo "Backup directory created" || {
+    echo "Backup directory creation failed";
+    exit 5;
+}
+```
+
+* Success → only success message runs
+* Failure → entire group runs (message + exit)
+
+---
+
+## Here Document (<<) and Here String (<<<)
+
+### Here Document (<<)
+
+* Used to feed **multi-line input** to a command.
+* It acts like typing multiple lines directly into STDIN.
+* Commonly used for configs, templates, inline files.
+
+**Syntax:**
+
+```
+command << EOF
+line1
+line2
+EOF
+```
+
+* `EOF` is a delimiter (can be any word).
+* Everything between the two delimiters is treated as input.
+
+### Here String (<<<)
+
+* Used to feed **a single string** as input to a command.
+* Perfect for passing variables or short text into commands that read from STDIN.
+
+**Syntax:**
+
+```
+command <<< "text"
+```
+
+**Example with read:**
+
+```
+IFS=' ' read -r first last <<< "$fullname"
+```
+
+* Feeds the value of `$fullname` as input to `read`.
+
+### Summary
+
+| Feature    | << (Here-Doc)      | <<< (Here-String)             |
+| ---------- | ------------------ | ----------------------------- |
+| Purpose    | Multi-line input   | Single-string input           |
+| Use Case   | Templates / blocks | Feeding variable to a command |
+| Reads From | Inline block       | Inline string                 |
+| Example    | cat << EOF         | read x <<< "hello"            |
+
+---
+---
+#Script
+
+# Q6 String Operations Script (with Comments)
+
+```bash
+#!/bin/bash
+
+read -p "Enter any string:" string
+
+if [[ -z $string ]]; then #You can use xargs to ignore spaces, otherwise it is not considered empty if user enters space
+  echo "You have to enter a string it cant be empty"
+  exit 1
+fi
+
+echo "Select an option to continue"
+echo "1 - Convert to UPPERCASE"
+echo "2 - Convert to lowercase"
+echo "3 - Count the number of characters"
+echo "4 - Reverse the String"
+
+read -p "Enter your Option:" option
+
+case $option in
+
+  1)
+    string=$( echo "$string" | tr '[:lower:]' '[:upper:]') #You can use #upper=${string^^} for converting to uppercase
+    echo "Uppercase string: $string"
+    ;;
+
+  2)
+    string=$(echo "$string" | tr '[:upper:]' '[:lower:]') #You can #uselower=${string,,} for converting to lowercase
+    echo "Uppercase string: $string"
+    echo "Lowercase string: $string"
+    ;;
+
+  3)
+    characters=$( echo -n "$string" | wc -c )
+    echo "Number of characters: $characters"
+    ;;
+
+  4)
+    string=$( echo "$string" | rev )
+    echo "Reverse string: $string"
+    ;;
+
+  *)
+    echo "Invalid Choice"
+    ;;
+esac
+```
+
 
 ---
 ---
